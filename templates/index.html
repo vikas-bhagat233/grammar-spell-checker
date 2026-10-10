@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Grammar & Spell Checker</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="logo">
+            <div class="logo-icon">✓</div>
+
+            <div>
+                <h1>Grammar & Spell Checker</h1>
+                <p>NLP Based Writing Assistant</p>
+            </div>
+        </div>
+
+        <div class="badge">
+            NLP Mini Project
+        </div>
+
+        <div class="header-actions">
+            <label class="file-btn">
+                Upload .txt
+                <input id="fileInput" type="file" accept=".txt,text/plain" onchange="uploadFile()">
+            </label>
+            <button class="theme-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode">Dark mode</button>
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <!-- Introduction -->
+
+        <section class="hero">
+
+            <h2>Write Better. Write Correctly.</h2>
+
+            <p>
+                Detect spelling and grammar mistakes
+                and get instant correction suggestions.
+            </p>
+
+        </section>
+
+
+        <!-- Input Card -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <h3>Enter Your Text</h3>
+
+                <span id="wordCount">
+                    0 words
+                </span>
+
+            </div>
+
+
+            <textarea
+                id="textInput"
+                placeholder="Example: I am goin to collge tommorow. He dont like this."
+            ></textarea>
+
+            <div class="highlight-panel">
+                <h4>Highlighted errors</h4>
+                <div id="highlightedText" class="highlighted-text"></div>
+            </div>
+
+
+            <div class="button-area">
+
+                <button
+                    id="checkButton"
+                    onclick="checkText()"
+                >
+                    <span>✓</span>
+                    Check Text
+                </button>
+
+                <button
+                    class="clear-btn"
+                    onclick="clearText()"
+                >
+                    Clear
+                </button>
+
+                <button class="download-btn" onclick="downloadCorrection()">Download .txt</button>
+
+            </div>
+
+        </section>
+
+
+        <!-- Loading -->
+
+        <div
+            id="loading"
+            class="loading hidden"
+        >
+            <div class="spinner"></div>
+
+            <p>
+                Analyzing your text...
+            </p>
+        </div>
+
+
+        <!-- Results -->
+
+        <section
+            id="results"
+            class="results hidden"
+        >
+
+            <!-- Statistics -->
+
+            <div class="stats">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon spelling">
+                        Aa
+                    </div>
+
+                    <div>
+                        <span>Spelling Errors</span>
+
+                        <strong id="spellingCount">
+                            0
+                        </strong>
+                    </div>
+
+                    <div class="stat-card score-card">
+                        <div class="stat-icon score">★</div>
+                        <div>
+                            <span>Quality Score</span>
+                            <strong id="qualityScore">0/100</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon grammar">
+                        G
+                    </div>
+
+                    <div>
+                        <span>Grammar Errors</span>
+
+                        <strong id="grammarCount">
+                            0
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon total">
+                        !
+                    </div>
+
+                    <div>
+                        <span>Total Errors</span>
+
+                        <strong id="totalCount">
+                            0
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Corrected Text -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h3>Corrected Text</h3>
+
+                    <button
+                        class="copy-btn"
+                        onclick="copyCorrection()"
+                    >
+                        Copy
+                    </button>
+
+                </div>
+
+                <div
+                    id="correctedText"
+                    class="corrected-text"
+                ></div>
+
+            </div>
+
+
+            <!-- Errors -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h3>Detected Errors</h3>
+
+                </div>
+
+                <div id="errorList"></div>
+
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3>Error Breakdown</h3></div>
+                <div class="chart" id="errorChart"></div>
+                <div class="highlight-legend">
+                    <span><i class="legend-spelling"></i> Spelling</span>
+                    <span><i class="legend-grammar"></i> Grammar</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="card history-card">
+            <div class="card-header">
+                <h3>Recent Checks</h3>
+                <button class="clear-btn" onclick="clearHistory()">Clear history</button>
+            </div>
+            <div id="historyList"><p class="muted">Your recent checks will appear here.</p></div>
+        </section>
+
+
+        <!-- No Error -->
+
+        <div
+            id="successMessage"
+            class="success-message hidden"
+        >
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <h3>No Errors Found!</h3>
+
+            <p>
+                Your text looks grammatically and
+                orthographically correct.
+            </p>
+
+        </div>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            Grammar & Spell Checker |
+            NLP Lab Mini Project |
+            B.E. Computer Engineering
+        </p>
+
+    </footer>
+
+
+    <script
+        src="{{ url_for('static', filename='script.js') }}"
+    ></script>
+
+</body>
+
+</html>
