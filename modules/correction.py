@@ -1,4 +1,14 @@
 def apply_corrections(text, corrections):
+    """
+    Correction Engine / post-processing stage.
+
+    This function takes all detected spelling and grammar issues and applies the
+    best suggestions back to the original text. It sorts corrections from right to
+    left to avoid offset shifts when replacing substrings.
+
+    This is part of the final NLP pipeline stage: transform errors into corrected
+    output, but it does not perform deep semantic or pragmatic understanding.
+    """
     if not corrections:
         return text
 

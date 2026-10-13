@@ -1,8 +1,18 @@
 from flask import Flask, jsonify, render_template, request
 
+# NLP Pipeline Flow in this project:
+# 1. Lexical Analysis -> check_spelling()
+# 2. Syntactic Analysis -> check_grammar()
+# 3. Limited Semantic Processing -> abbreviation normalization
+# 4. Discourse Analysis -> analyze_discourse()
+# 5. Pragmatic Analysis -> analyze_pragmatic()
+# 6. Correction Engine -> apply_corrections()
+# 7. Response generation -> JSON output to the frontend
+
 from modules.spell_checker import check_spelling
 from modules.grammar_checker import check_grammar
 from modules.correction import apply_corrections
+from modules.discourse_pragmatic import analyze_discourse, analyze_pragmatic
 
 app = Flask(__name__)
 
@@ -37,8 +47,27 @@ def check_text():
         # Grammar checking
         grammar_errors = check_grammar(text)
 
+        # A grammar rule can provide a context-aware replacement for a token
+        # that the spelling dictionary also flags (for example, "pls" -> "please").
+        # Keep the more specific grammar finding and avoid duplicate corrections.
+        grammar_ranges = {
+            (error["offset"], error["length"])
+            for error in grammar_errors
+        }
+        spelling_errors = [
+            error
+            for error in spelling_errors
+            if (error["offset"], error["length"]) not in grammar_ranges
+        ]
+
+        # Discourse analysis: detect topic continuity and reference clarity.
+        discourse_analysis = analyze_discourse(text)
+
+        # Pragmatic analysis: detect tone, intent, and style markers.
+        pragmatic_analysis = analyze_pragmatic(text)
+
         # Combine corrections
-        all_corrections = spelling_errors + grammar_errors
+        all_corrections = grammar_errors + spelling_errors
 
         corrected_text = apply_corrections(
             text,
@@ -57,6 +86,13 @@ def check_text():
             "corrected_text": corrected_text,
             "spelling_errors": spelling_errors,
             "grammar_errors": grammar_errors,
+            "discourse_analysis": discourse_analysis["issues"],
+            "discourse_summary": discourse_analysis["summary"],
+            "discourse_status": discourse_analysis["status"],
+            "pragmatic_analysis": pragmatic_analysis["issues"],
+            "pragmatic_summary": pragmatic_analysis["summary"],
+            "pragmatic_tone": pragmatic_analysis["tone"],
+            "pragmatic_intent": pragmatic_analysis["intent"],
             "total_errors": error_count,
             "word_count": word_count,
             "quality_score": quality_score

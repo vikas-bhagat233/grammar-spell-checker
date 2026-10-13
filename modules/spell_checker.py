@@ -1,6 +1,13 @@
 import re
 from spellchecker import SpellChecker
 
+# Lexical Analysis Layer
+# This module performs tokenization and word-level validation.
+# It splits the input sentence into words, checks whether each word is in the
+# dictionary, and prepares correction suggestions for unknown words.
+# This is a core NLP lexical stage because it works at the word level rather than
+# considering sentence meaning or grammar structure.
+
 spell = SpellChecker()
 
 # Common words that should not be treated as spelling errors
@@ -22,9 +29,18 @@ spell.word_frequency.load_words(CUSTOM_WORDS)
 
 
 def check_spelling(text):
+    """
+    Lexical analysis for spelling detection.
+
+    - Tokenizes the input into words.
+    - Compares each word against the dictionary.
+    - Flags unknown words as possible spelling mistakes.
+    - Returns a list of corrections with word positions and suggestions.
+    """
     errors = []
 
-    # Find words while keeping their positions
+    # Lexical Analysis: break the sentence into individual words.
+    # We keep offsets so corrections can be applied back to the original text.
     matches = list(re.finditer(r"\b[A-Za-z]+\b", text))
 
     words = [match.group() for match in matches]

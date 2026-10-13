@@ -98,6 +98,12 @@ function displayResults(data) {
     const grammar =
         data.grammar_errors || [];
 
+    const discourseFindings =
+        data.discourse_analysis || [];
+
+    const pragmaticFindings =
+        data.pragmatic_analysis || [];
+
 
     document.getElementById(
         "spellingCount"
@@ -128,6 +134,24 @@ function displayResults(data) {
         data.corrected_text;
     renderHighlights(data.original_text, [...spelling, ...grammar]);
     renderChart(spelling.length, grammar.length);
+    renderAnalysis(
+        "discourseSummary",
+        "discourseFindings",
+        data.discourse_summary,
+        discourseFindings
+    );
+    renderAnalysis(
+        "pragmaticSummary",
+        "pragmaticFindings",
+        data.pragmatic_summary,
+        pragmaticFindings
+    );
+    document.getElementById("discourseStatus").textContent =
+        data.discourse_status || "unknown";
+    document.getElementById("pragmaticTone").textContent =
+        data.pragmatic_tone || "neutral";
+    document.getElementById("pragmaticIntent").textContent =
+        data.pragmatic_intent || "statement";
 
 
     const errorList =
@@ -147,16 +171,13 @@ function displayResults(data) {
 
 
     if (allErrors.length === 0) {
-
-        document.getElementById(
-            "results"
-        ).classList.add("hidden");
-
         document.getElementById(
             "successMessage"
         ).classList.remove("hidden");
-
-        return;
+    } else {
+        document.getElementById(
+            "successMessage"
+        ).classList.add("hidden");
     }
 
 
@@ -213,6 +234,57 @@ function displayResults(data) {
         "results"
     ).classList.remove("hidden");
 
+}
+
+function renderAnalysis(summaryId, findingsId, summary, findings) {
+    document.getElementById(summaryId).textContent =
+        summary || "No analysis summary is available.";
+
+    const container = document.getElementById(findingsId);
+    container.replaceChildren();
+
+    if (!findings.length) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "analysis-empty";
+        emptyMessage.textContent = "No potential issues detected.";
+        container.appendChild(emptyMessage);
+        return;
+    }
+
+    findings.forEach(finding => {
+        const item = document.createElement("article");
+        item.className = "analysis-item";
+
+        const heading = document.createElement("h4");
+        heading.textContent = finding.message || "Analysis finding";
+        item.appendChild(heading);
+
+        if (finding.word) {
+            const context = document.createElement("p");
+            context.className = "analysis-context";
+            context.textContent = finding.word;
+            item.appendChild(context);
+        }
+
+        if (finding.suggestion) {
+            const suggestion = document.createElement("p");
+            suggestion.className = "analysis-suggestion";
+            suggestion.textContent = `Suggestion: ${finding.suggestion}`;
+            item.appendChild(suggestion);
+        }
+
+        if (Array.isArray(finding.suggestions) && finding.suggestions.length) {
+            const alternatives = document.createElement("ul");
+            finding.suggestions.forEach(text => {
+                const option = document.createElement("li");
+                option.textContent = text;
+                alternatives.appendChild(option);
+            });
+            item.appendChild(alternatives);
+        }
+
+        container.appendChild(item);
+    });
 }
 
 

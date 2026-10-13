@@ -1,6 +1,12 @@
 import language_tool_python
 import re
 
+# Syntactic Analysis Layer
+# This module handles sentence-level grammar checking and punctuation analysis.
+# It uses rule-based checks and external grammar validation to detect issues in
+# sentence structure, capitalization, and informal phrase usage.
+# This is the main NLP syntactic layer of the project.
+
 _tool = None
 
 COMMON_ABBREVIATIONS = {
@@ -32,6 +38,14 @@ def get_tool():
 
 
 def check_grammar(text):
+    """
+    Syntactic analysis for grammar checking.
+
+    - Applies grammar rules and sentence-level checks.
+    - Filters out noisy style rules that are not useful for this project.
+    - Detects capitalization and punctuation problems.
+    - Uses abbreviation expansion as a limited semantic correction step.
+    """
     errors = []
     abbreviation_errors = check_abbreviations(text)
 
@@ -91,6 +105,15 @@ def check_grammar(text):
 
 
 def check_abbreviations(text):
+    """
+    Limited Semantic Analysis.
+
+    This function maps common chat abbreviations to proper English phrases.
+    Example: "u" -> "you", "r" -> "are", "pls" -> "please".
+
+    This is a shallow semantic layer because it interprets common informal
+    expressions, but it does not perform deep contextual meaning analysis.
+    """
     errors = []
     occupied_ranges = []
     for phrase, replacement in sorted(
@@ -119,6 +142,13 @@ def check_abbreviations(text):
 
 
 def check_basic_punctuation(text):
+    """
+    Sentence-level punctuation and capitalization validation.
+
+    This is still part of syntactic analysis: it checks whether the sentence
+    starts with a capital letter and whether the input ends with proper sentence
+    punctuation.
+    """
     errors = []
     for match in re.finditer(r"(?m)(^|[.!?]\s+)([a-z])", text):
         offset = match.start(2)
