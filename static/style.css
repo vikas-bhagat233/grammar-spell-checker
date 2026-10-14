@@ -223,6 +223,11 @@ textarea:focus {
     border-bottom: 2px solid #dc2626;
 }
 
+.semantic-mark {
+    background: #ddd6fe;
+    border-bottom: 2px solid #7c3aed;
+}
+
 
 /* BUTTONS */
 
@@ -457,6 +462,7 @@ button {
 
 .bar-spelling { background: #f97316; }
 .bar-grammar { background: #ef4444; }
+.bar-semantic { background: #8b5cf6; }
 
 .highlight-legend {
     display: flex;
@@ -474,6 +480,7 @@ button {
 
 .legend-spelling { background: #f97316; }
 .legend-grammar { background: #ef4444; }
+.legend-semantic { background: #8b5cf6; }
 
 .history-item {
     width: 100%;
@@ -562,6 +569,55 @@ button {
     font-size: 14px;
 }
 
+.nlp-stages {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.nlp-stage {
+    min-width: 0;
+}
+
+.nlp-stage .card-header {
+    margin-bottom: 10px;
+}
+
+.nlp-stage .analysis-summary {
+    margin-bottom: 10px;
+}
+
+.dictionary-source {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #2563eb;
+    font-size: 14px;
+}
+
+body.dark-mode .dictionary-source {
+    color: #93c5fd;
+}
+
+.status-warning {
+    color: #b45309;
+    background: #fef3c7;
+}
+
+.status-info {
+    color: #1d4ed8;
+    background: #dbeafe;
+}
+
+body.dark-mode .status-warning {
+    color: #fcd34d;
+    background: #78350f;
+}
+
+body.dark-mode .status-info {
+    color: #bfdbfe;
+    background: #1e3a8a;
+}
+
 
 /* SUCCESS */
 
@@ -644,5 +700,9 @@ footer {
     .analysis-labels {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .nlp-stages {
+        grid-template-columns: 1fr;
     }
 }

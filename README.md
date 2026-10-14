@@ -12,14 +12,15 @@ and grammatical errors in English text and provides correction suggestions.
 - HTML
 - CSS
 - JavaScript
-- PySpellChecker
-- LanguageTool
+- PySpellChecker's bundled English dictionary
 - Natural Language Processing
 
 ## Features
 
 - Spelling error detection
-- Grammar error detection
+- Rule-based grammar and punctuation checks
+- Dictionary-based spelling detection
+- Five-stage lexical, syntactic, semantic, discourse, and pragmatic analysis
 - Correction suggestions
 - Automatically corrected text
 - Error statistics
@@ -61,18 +62,20 @@ This project implements a simplified NLP pipeline for English grammar and spelli
 - Purpose: split the text into words and identify tokens.
 - Example: `"I am goin to collge tommorow."` is tokenized into words like `I`, `am`, `goin`, `to`, `collge`, `tommorow`.
 - Role in this project: spelling detection uses regex-based tokenization and dictionary lookup.
+- Dictionary source: [PySpellChecker bundled English dictionary (`en.json.gz`)](https://github.com/barrust/pyspellchecker/blob/master/spellchecker/resources/en.json.gz).
 
 ### 2. Syntactic Analysis
 - Implemented in: `modules/grammar_checker.py`
 - Purpose: check grammar, sentence structure, punctuation, and capitalization.
-- Example: detecting missing punctuation, improper capitalization, sentence-level grammar issues.
-- Role in this project: LanguageTool is used to detect grammar and spelling issues, while custom rules identify punctuation and capitalization problems.
+- Example: detecting selected subject-verb agreement patterns, repeated words, missing punctuation, and improper capitalization.
+- Role in this project: local Python rules perform these checks without an external grammar service.
+- Limitation: these rules cover common examples and are not a complete grammar checker.
 
 ### 3. Semantic Analysis (Limited)
-- Implemented in: `modules/grammar_checker.py` and `modules/correction.py`
+- Implemented in: `modules/grammar_checker.py`
 - Purpose: map informal or incorrect phrases to their correct meaning.
 - Example: `"u" -> "you"`, `"r" -> "are"`, `"pls" -> "please"`.
-- Role in this project: this is a shallow semantic layer because it recognizes common abbreviations and transforms them to proper English.
+- Role in this project: explicit abbreviation mappings produce semantic findings and correction suggestions.
 - Limitation: the project does not deeply analyze sentence meaning or context.
 
 ### 4. Discourse Analysis
@@ -98,12 +101,12 @@ This project implements a simplified NLP pipeline for English grammar and spelli
 
 1. User enters text in the web interface
 2. Flask server receives the request in `app.py`
-3. `check_spelling()` identifies misspelled words
-4. `check_grammar()` detects grammar and punctuation issues
-5. `analyze_discourse()` checks sentence continuity and reference clarity
-6. `analyze_pragmatic()` detects tone and intent patterns
-7. `apply_corrections()` applies the suggested replacements
-8. Final corrected text and analysis results are returned to the user
+3. Lexical analysis tokenizes the text and looks up words in PySpellChecker's English dictionary
+4. Syntactic analysis applies local grammar, capitalization, and punctuation rules
+5. Semantic analysis checks known informal phrases against explicit abbreviation mappings
+6. Discourse analysis checks sentence continuity and reference clarity
+7. Pragmatic analysis detects heuristic tone and intent patterns
+8. The UI displays the result of each stage; `apply_corrections()` applies supported suggestions
 
 ## How to Run
 
@@ -118,4 +121,3 @@ python app.py
 Open:
 
 http://127.0.0.1:5000
-

@@ -2,7 +2,7 @@ def apply_corrections(text, corrections):
     """
     Correction Engine / post-processing stage.
 
-    This function takes all detected spelling and grammar issues and applies the
+    This function takes spelling, grammar, and semantic findings and applies the
     best suggestions back to the original text. It sorts corrections from right to
     left to avoid offset shifts when replacing substrings.
 
@@ -17,7 +17,7 @@ def apply_corrections(text, corrections):
     # from changing later positions.
     corrections = sorted(
         corrections,
-        key=lambda x: x["offset"],
+        key=lambda x: (x["offset"], x["length"]),
         reverse=True
     )
 

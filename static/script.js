@@ -98,11 +98,8 @@ function displayResults(data) {
     const grammar =
         data.grammar_errors || [];
 
-    const discourseFindings =
-        data.discourse_analysis || [];
-
-    const pragmaticFindings =
-        data.pragmatic_analysis || [];
+    const semantic =
+        data.semantic_errors || [];
 
 
     document.getElementById(
@@ -132,26 +129,9 @@ function displayResults(data) {
 
     correctedText.textContent =
         data.corrected_text;
-    renderHighlights(data.original_text, [...spelling, ...grammar]);
-    renderChart(spelling.length, grammar.length);
-    renderAnalysis(
-        "discourseSummary",
-        "discourseFindings",
-        data.discourse_summary,
-        discourseFindings
-    );
-    renderAnalysis(
-        "pragmaticSummary",
-        "pragmaticFindings",
-        data.pragmatic_summary,
-        pragmaticFindings
-    );
-    document.getElementById("discourseStatus").textContent =
-        data.discourse_status || "unknown";
-    document.getElementById("pragmaticTone").textContent =
-        data.pragmatic_tone || "neutral";
-    document.getElementById("pragmaticIntent").textContent =
-        data.pragmatic_intent || "statement";
+    renderHighlights(data.original_text, [...spelling, ...grammar, ...semantic]);
+    renderChart(spelling.length, grammar.length, semantic.length);
+    renderNlpStages(data.nlp_stages || []);
 
 
     const errorList =
@@ -165,7 +145,8 @@ function displayResults(data) {
 
     const allErrors = [
         ...spelling,
-        ...grammar
+        ...grammar,
+        ...semantic
     ];
     currentErrors = allErrors;
 
@@ -189,10 +170,11 @@ function displayResults(data) {
         item.className = "error-item";
 
 
-        const type =
-            error.type === "spelling"
-                ? "Spelling"
-                : "Grammar";
+        const type = {
+            spelling: "Spelling",
+            grammar: "Grammar",
+            semantic: "Semantic"
+        }[error.type] || "Analysis";
 
 
         item.innerHTML = `
@@ -287,6 +269,79 @@ function renderAnalysis(summaryId, findingsId, summary, findings) {
     });
 }
 
+function renderNlpStages(stages) {
+    const container = document.getElementById("nlpStages");
+    container.replaceChildren();
+
+    stages.forEach(stage => {
+        const card = document.createElement("article");
+        card.className = "analysis-item nlp-stage";
+
+        const header = document.createElement("div");
+        header.className = "card-header";
+
+        const title = document.createElement("h4");
+        title.textContent = stage.title;
+
+        const status = document.createElement("span");
+        status.className = `analysis-status status-${stage.status}`;
+        status.textContent = stage.status;
+
+        header.append(title, status);
+        card.appendChild(header);
+
+        const summary = document.createElement("p");
+        summary.className = "analysis-summary";
+        summary.id = `stage-summary-${stage.id}`;
+        summary.textContent = stage.summary;
+        card.appendChild(summary);
+
+        if (stage.tokens) {
+            const tokenList = document.createElement("p");
+            tokenList.className = "analysis-context";
+            const displayedTokens = stage.tokens.slice(0, 30);
+            const remaining = stage.tokens.length - displayedTokens.length;
+            tokenList.textContent =
+                `Tokens: ${displayedTokens.join(", ")}` +
+                (remaining > 0 ? `, and ${remaining} more` : "");
+            card.appendChild(tokenList);
+        }
+
+        if (stage.source_url && stage.source_label) {
+            const sourceLink = document.createElement("a");
+            sourceLink.className = "dictionary-source";
+            sourceLink.href = stage.source_url;
+            sourceLink.target = "_blank";
+            sourceLink.rel = "noopener noreferrer";
+            sourceLink.textContent = stage.source_label;
+            card.appendChild(sourceLink);
+        }
+
+        if (stage.details) {
+            const details = document.createElement("div");
+            details.className = "analysis-labels";
+            stage.details.forEach(value => {
+                const label = document.createElement("span");
+                label.textContent = value;
+                details.appendChild(label);
+            });
+            card.appendChild(details);
+        }
+
+        const findings = document.createElement("div");
+        findings.className = "analysis-findings";
+        findings.id = `stage-findings-${stage.id}`;
+        card.appendChild(findings);
+        container.appendChild(card);
+
+        renderAnalysis(
+            summary.id,
+            findings.id,
+            stage.summary,
+            stage.findings || []
+        );
+    });
+}
 
 // Clear everything
 function clearText() {
@@ -369,7 +424,11 @@ function renderHighlights(text, errors) {
         if (error.offset < cursor) return;
         target.appendChild(document.createTextNode(text.slice(cursor, error.offset)));
         const mark = document.createElement("mark");
-        mark.className = error.type === "spelling" ? "spelling-mark" : "grammar-mark";
+        mark.className = {
+            spelling: "spelling-mark",
+            grammar: "grammar-mark",
+            semantic: "semantic-mark"
+        }[error.type] || "grammar-mark";
         mark.textContent = text.slice(error.offset, error.offset + error.length);
         mark.title = error.suggestion ? `Suggestion: ${error.suggestion}` : error.message;
         target.appendChild(mark);
@@ -378,11 +437,12 @@ function renderHighlights(text, errors) {
     target.appendChild(document.createTextNode(text.slice(cursor)));
 }
 
-function renderChart(spelling, grammar) {
-    const total = Math.max(spelling + grammar, 1);
+function renderChart(spelling, grammar, semantic) {
+    const total = Math.max(spelling + grammar + semantic, 1);
     document.getElementById("errorChart").innerHTML = `
         <div class="bar-row"><span>Spelling</span><div class="bar"><i class="bar-spelling" style="width:${spelling / total * 100}%"></i></div><b>${spelling}</b></div>
-        <div class="bar-row"><span>Grammar</span><div class="bar"><i class="bar-grammar" style="width:${grammar / total * 100}%"></i></div><b>${grammar}</b></div>`;
+        <div class="bar-row"><span>Grammar</span><div class="bar"><i class="bar-grammar" style="width:${grammar / total * 100}%"></i></div><b>${grammar}</b></div>
+        <div class="bar-row"><span>Semantic</span><div class="bar"><i class="bar-semantic" style="width:${semantic / total * 100}%"></i></div><b>${semantic}</b></div>`;
 }
 
 function downloadCorrection() {
